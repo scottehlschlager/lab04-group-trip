@@ -7,9 +7,8 @@
 * reports on a whole group instead of one person
 */
 
-Console.WriteLine("=== Part 1: Road Trip ===");
 Console.Write("What is the round trip in miles? ");
-int milesForTheTrip = Convert.ToInt32(Console.ReadLine());
+int miles = Convert.ToInt32(Console.ReadLine());
 
 Console.Write("What is the miles per gallon of the car? ");
 int milesPerGallon = Convert.ToInt32(Console.ReadLine());
@@ -17,86 +16,99 @@ int milesPerGallon = Convert.ToInt32(Console.ReadLine());
 Console.Write("What is the price per gallon? ");
 double pricePerGallon = Convert.ToDouble(Console.ReadLine());
 
+Console.Write("How many pizzas did we need? ");
+int pizzaCount = Convert.ToInt32(Console.ReadLine());
+
+Console.Write("How much does a pizza cost? ");
+double pricePerPizza = Convert.ToDouble(Console.ReadLine());
+
+const int slicesPerPizza = 8;
+
+const double taxRate = 0.18;
+
 Console.WriteLine();
 
-//do the math
+//part 1
 
-double gallonsNeeded = milesForTheTrip / (double)milesPerGallon;
+System.Console.WriteLine("=== Part 1: The Trip ===");
 
-double fuelCost = gallonsNeeded * pricePerGallon;
+double fuel = FuelCost(miles, milesPerGallon, pricePerGallon);
+System.Console.WriteLine("Fuel cost: " + fuel.ToString("C"));
 
-//do the outpout
+double pizzaCost = pizzaCount * pricePerPizza;
+System.Console.WriteLine("Pizza cost: " + pizzaCost.ToString("C"));
 
-Console.WriteLine("Gallons needed: " + gallonsNeeded.ToString("F2"));
-Console.WriteLine("Fuel cost: " + fuelCost.ToString("C"));
+double tripTotal = fuel + pizzaCost;
+System.Console.WriteLine("Trip total: " + tripTotal.ToString("C"));
 
 Console.WriteLine();
 
 //part 2
 
-Console.WriteLine("=== Part 2: Pizza Party ===");
-Console.Write("How many people are going? ");
-int tripMembers = Convert.ToInt32(Console.ReadLine());
+Console.WriteLine("=== Part 2: The Group ===");
 
-Console.Write("How many pizzas did we need? ");
-int pizzaCount = Convert.ToInt32(Console.ReadLine());
+string[] names = { "Ada", "Grace", "Alan", "Katherine" };
+System.Console.WriteLine("People going: " + names.Length);
 
-Console.Write("How mcuh does a pizza cost? ");
-double pricePerPizza = Convert.ToDouble(Console.ReadLine());
+double[] hoursWorked = { 22, 15, 30, 18};
 
-Console.WriteLine();
+double[] hourlyRates = { 13.50, 16.00, 11.20, 14.80 };
 
-const int slicesPerPizza = 8;
+double slicesPerPerson = pizzaCount * slicesPerPizza / names.Length;
+Console.WriteLine("Slices each: " + slicesPerPerson.ToString("F1"));
 
-double totalSlices = pizzaCount * slicesPerPizza;
-
-double slicesPerPerson = totalSlices / tripMembers;
-
-double pizzaCost = pizzaCount * pricePerPizza;
-
-Console.WriteLine("Total slices: " + totalSlices.ToString());
-Console.WriteLine("Slices per person: " + slicesPerPerson.ToString("F1"));
-Console.WriteLine("Pizza cost: " + pizzaCost.ToString("C"));
+double costPerPerson = tripTotal / names.Length;
+System.Console.WriteLine("Cost per person: " +  costPerPerson.ToString("C"));
 
 Console.WriteLine();
 
 //part 3
 
-Console.WriteLine("=== Part 3: Paycheck ===");
-Console.Write("How many hours were worked this week? ");
-int hoursWorked = Convert.ToInt32(Console.ReadLine());
+Console.WriteLine("=== Part 3: Who Works How Long ===");
 
-Console.Write("How much are you paid per hour? ");
-double hourlyPay = Convert.ToDouble(Console.ReadLine());
+double totalHours = 0;
+double totalTakeHomePay = 0;
+double longestMustWork = 0;
 
-Console.WriteLine();
+for (int i = 0; i < names.Length; i++)
+{
+    double pay = TakeHomePay(hoursWorked[i], hourlyRates[i], taxRate);
+    double hourlyAfterTax = hourlyRates[i] - (hourlyRates[i] * taxRate);
+    double takeHomePerHour = (TakeHomePay(hoursWorked[i], hourlyRates[i], taxRate)) / hoursWorked[i];
+    double hoursToCover = HoursToCover(costPerPerson, takeHomePerHour);
+    Console.WriteLine($"{names[i]}: takes home {pay.ToString("C")} for {hoursWorked[i]} hours, {hourlyAfterTax.ToString("C")} per hour, must work {hoursToCover.ToString("F2")} hours");
 
-const double taxRate = 0.18;
+    totalHours += hoursWorked[i];
+    totalTakeHomePay += pay;
+    longestMustWork = Math.Max(longestMustWork, hoursToCover);
+}
 
-double grossPay = hoursWorked * hourlyPay;
+System.Console.WriteLine();
 
-double taxWithheld = grossPay * taxRate;
+System.Console.WriteLine("Total hours worked: " + totalHours);
+System.Console.WriteLine("Total take home pay: " + totalTakeHomePay.ToString("C"));
+System.Console.WriteLine("Longest anyone must work: " + longestMustWork.ToString("F2"));
 
-double takeHomePay = grossPay - taxWithheld;
+//methods
 
-Console.WriteLine("Gross pay: " + grossPay.ToString("C"));
-Console.WriteLine("Tax withhed: " + taxWithheld.ToString("C"));
-Console.WriteLine("Take home pay: " + takeHomePay.ToString("C"));
+//calculates the cost of fuel for the trip
+static double FuelCost(double miles, double milesPerGallon, double pricePerGallon)
+{
+    double gallons = miles / milesPerGallon;
+    return gallons * pricePerGallon;
+}
 
-Console.WriteLine();
+//calculates the amount of take home pay for each trip member
+static double TakeHomePay(double hours, double hourlyPay, double taxRate)
+{
+    double grossPay = hours * hourlyPay;
+    double taxWithheld = grossPay * taxRate;
+    double pay = grossPay - taxWithheld;
+    return pay;
+}
 
-//part 4
-
-Console.WriteLine("=== Part 4: The Whole Trip ===");
-double tripTotal = fuelCost + pizzaCost;
-
-double costPerPerson = tripTotal / tripMembers;
-
-double hourlyTakeHomePay = takeHomePay / hoursWorked;
-
-double hoursMustWork = costPerPerson / hourlyTakeHomePay;
-
-Console.WriteLine("Trip total: " + tripTotal.ToString("C"));
-Console.WriteLine("Cost per person: " + costPerPerson.ToString("C"));
-Console.WriteLine("Take home pay per hour: " + hourlyTakeHomePay.ToString("C"));
-Console.WriteLine("Hours you must work to cover your share: " + hoursMustWork.ToString("F2"));
+//calculates how many hours each member must work to cover their cost
+static double HoursToCover(double costPerPerson, double takeHomePerHour)
+{
+    return costPerPerson / takeHomePerHour;
+}
